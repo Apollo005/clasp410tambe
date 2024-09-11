@@ -39,8 +39,12 @@ import matplotlib.pyplot as plt
             
 ######################
 
+nNorth = 3
+nEast = 3
+maxiter = 4
+
                 
-def fire_spread(nNorth = 3, nEast = 3, maxiter = 4):
+def fire_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter):
     #this function description, later p_bare, p_spread
     #1) create forest
     forest = np.zeros((maxiter,nNorth,nEast), dtype=int) + 2
@@ -55,10 +59,17 @@ def fire_spread(nNorth = 3, nEast = 3, maxiter = 4):
 
         forest[k+1,:,:] = forest[k,:,:]
 
-        for i in range(nNorth-1) :
-            for j in range(nEast) :
-                if (forest[k,i,j] == 3) & (forest[k,i+1,j] == 2):
-                        forest[k+1, i+1, j] = 3
+        for i in range(nNorth):
+            for j in range(nEast):
+                if forest[k, i, j] == 3:
+                    if i < nNorth - 1 and forest[k, i + 1, j] == 2:
+                        forest[k+1, i + 1, j] = 3
+                    if i > 0 and forest[k, i - 1, j] == 2:
+                        forest[k+1, i - 1, j] = 3
+                    if j < nEast - 1 and forest[k, i, j + 1] == 2:
+                        forest[k+1, i, j + 1] = 3
+                    if j > 0 and forest[k, i, j - 1] == 2:
+                        forest[k+1, i, j - 1] = 3
 
         wasburn = forest[k,:,:] == 3
         forest[k+1, wasburn] = 1
