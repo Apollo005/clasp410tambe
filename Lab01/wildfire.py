@@ -44,9 +44,10 @@ def full_fire_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_spr
     # Visualize the initial state
         
     fig,ax = plt.subplots(1,1)
-    forest_cmap = ListedColormap(['tan', 'darkgreen', 'crimson',])
+    forest_cmap = ListedColormap(['tan', 'darkgreen', 'crimson'])
     ax.pcolor(forest[0,:,:], cmap=forest_cmap, vmin=1, vmax=3)
     ax.set_title(f'iteration = {0:03d}')
+    fig.savefig(f'fig{0:04d}.png')
 
     # Loop through each iteration
 
@@ -55,7 +56,7 @@ def full_fire_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_spr
 
         forest[k+1,:,:] = forest[k,:,:] # Copy the previous state into the next state
 
-       # Spread to the North using logical masking
+        # Spread to the North using logical masking
         
         doburnN = (forest[k, :-1, :] == 3) & (forest[k, 1:, :] == 2) & (ignite[1:, :] <= prob_spread)
         forest[k+1, 1:, :][doburnN] = 3
@@ -83,13 +84,10 @@ def full_fire_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_spr
         # Visualize the current state
 
         fig,ax = plt.subplots(1,1)
-        forest_cmap = ListedColormap(['tan', 'darkgreen', 'crimson',])
+        forest_cmap = ListedColormap(['tan', 'darkgreen', 'crimson'])
         ax.pcolor(forest[k+1,:,:], cmap=forest_cmap, vmin=1, vmax=3)
         ax.set_title(f'iteration = {k+1:03d}')
-
-        fig.savefig(f'fig{k:04d}.png')
-        plt.show()
-        plt.close('all')
+        fig.savefig(f'fig{k+1:04d}.png')
 
         # Quit if all fires are out
         nBurn = (forest[k+1,:,:] == 3).sum()
@@ -114,61 +112,78 @@ def full_disease_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_
     # Determine which cells are bare patches
 
     isbare = np.random.rand(nNorth, nEast)
-    isbare = isbare <= prob_bare # logical mask for bare cells
-    disease[0,isbare] = 1 # Set bare patches to 1
+    isbare = isbare <= prob_bare # logical mask for immune cells
+    disease[0,isbare] = 1 # Set immune patches to 1
+
+    # Determine which cells will turn fatal if infected
 
     isfatal = np.random.rand(nNorth, nEast)
     isfatal = isfatal <= prob_fatal
     
+    # Randomly start an infection in the center cell if it's not bare
+
     if (np.random.rand() <= prob_start):
         disease[0, istart, jstart] = 3
 
+    # Visualize the initial state
+
     fig,ax = plt.subplots(1,1)
-    forest_cmap = ListedColormap(['black','lightgreen', 'darkgreen', 'crimson',])
+    forest_cmap = ListedColormap(['black','lightgreen', 'darkgreen', 'crimson'])
     ax.pcolor(disease[0,:,:], cmap=forest_cmap, vmin=0, vmax=3)
     ax.set_title(f'iteration = {0:03d}')
+    fig.savefig(f'fig{0:04d}.png')
 
     for k in range(maxiter-1) :
-        ignite = np.random.rand(nNorth, nEast)
+        ignite = np.random.rand(nNorth, nEast) # Random spread probability
 
-        disease[k+1,:,:] = disease[k,:,:]
+        disease[k+1,:,:] = disease[k,:,:] # Copy the previous state into the next state
 
-       # North
+        # Spread to the North using logical masking
+
         doburnN = (disease[k, :-1, :] == 3) & (disease[k, 1:, :] == 2) & (ignite[1:, :] <= prob_spread)
         disease[k+1, 1:, :][doburnN] = 3
 
-        # South
+        # Spread to the South using logical masking
+
         doburnS = (disease[k, 1:, :] == 3) & (disease[k, :-1, :] == 2) & (ignite[:-1, :] <= prob_spread)
         disease[k+1, :-1, :][doburnS] = 3
 
-        # East
+        # Spread to the East using logical masking
+
         doburnE = (disease[k, :, :-1] == 3) & (disease[k, :, 1:] == 2) & (ignite[:, 1:] <= prob_spread)
         disease[k+1, :, 1:][doburnE] = 3
 
-        # West
+        # Spread to the West using logical masking
+        
         doburnW = (disease[k, :, 1:] == 3) & (disease[k, :, :-1] == 2) & (ignite[:, :-1] <= prob_spread)
         disease[k+1, :, :-1][doburnW] = 3
+        
+        # Identify the cells that were infected in the current iteration
 
         wasinfected = disease[k,:,:] == 3
         
+        # Determine if infected cells become fatal (state 0)
+
         is_fatal_now = (disease[k, :, :] == 3) & (isfatal)
 
         # Update the disease state: tiles that meet the fatal condition turn into 0
+
         disease[k+1, is_fatal_now] = 0
 
         # Otherwise, the infected tiles turn back to 1 (recover + immune)
+
         disease[k+1, wasinfected & ~is_fatal_now] = 1
         
-        fig,ax = plt.subplots(1,1)
-        #contour = ax.matshow(disease[k+1,:,:], vmin=0, vmax=3)
-        ax.set_title(f'iteration = {k+1:03d}')
-        forest_cmap = ListedColormap(['black','lightgreen', 'darkgreen', 'crimson',])
-        ax.pcolor(disease[k+1,:,:], cmap=forest_cmap, vmin=0, vmax=3)
-        fig.savefig(f'fig{k:04d}.png')
-        plt.show()
-        plt.close('all')
+        # Visualize the current state
 
-        #quit once all fires are out
+        fig,ax = plt.subplots(1,1)
+        ax.set_title(f'iteration = {k+1:03d}')
+        forest_cmap = ListedColormap(['black','lightgreen', 'darkgreen', 'crimson'])
+        ax.pcolor(disease[k+1,:,:], cmap=forest_cmap, vmin=0, vmax=3)
+        fig.savefig(f'fig{k+1:04d}.png')
+
+        # Quit if all diseases are out
+
         ndiseases = (disease[k+1,:,:] == 3).sum()
         if ndiseases == 0:
             print(f"burn completed in {k+1} steps")
@@ -185,5 +200,5 @@ def explore_burnrate():
 
     plt.plot(prob,nsteps)
 
-#full_fire_spread(3,5,6)
+full_fire_spread(3,5,6)
 full_disease_spread(3,5,6)
