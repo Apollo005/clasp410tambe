@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 
 '''
-This file contains tools and scripts for completing Lab 1 for CLaSP 410.
+This file contains tools and scripts for completing Lab 1 for CLaSP 410. 
+We explore the questions found below:
+
+How does the spread of wildfire depend on the
+probability of spread of fire and initial forest density?.
+
 To reproduce the plots shown in the lab report, do this...
 '''
 import numpy as np
