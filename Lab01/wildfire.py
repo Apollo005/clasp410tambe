@@ -4,8 +4,14 @@
 This file contains tools and scripts for completing Lab 1 for CLaSP 410. 
 We explore the questions found below:
 
-How does the spread of wildfire depend on the
-probability of spread of fire and initial forest density?.
+How does the spread of wildfire depend on the probability of spread of fire and initial forest density?.
+How do disease mortality rate and early vaccine rates affect disease spread?
+
+Wildfires can be modeled as pseudo-stochastic processes where the fire spreads to adjacent areas based on certain probabilities. 
+The spread is influenced by factors like temperature, moisture, wind, and vegetation type. 
+Areas lacking fuel (e.g., trees or dry grass) or that are already burned cannot sustain fire. 
+Thus, both the type of vegetation and the wildfire's progression determine how the fire spreads across a region. 
+In this code, a simple stochastic, universally applicable model for spread will be developed.
 
 To reproduce the plots shown in the lab report, do this...
 '''
@@ -48,14 +54,14 @@ def full_fire_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_spr
 
     # Visualize the initial state
         
-    # fig,ax = plt.subplots(1,1)
-    # forest_cmap = ListedColormap(['tan', 'darkgreen', 'crimson'])
-    # ax.pcolor(forest[0,:,:], cmap=forest_cmap, vmin=1, vmax=3)
-    # ax.set_title(f'Forest Status (i-step = {0:03d})')
-    # ax.set_xlabel('X km')
-    # ax.set_ylabel('Y km')
-    # fig.savefig(f'fig{0:04d}.png')
-    #plt.show()
+    fig,ax = plt.subplots(1,1)
+    forest_cmap = ListedColormap(['tan', 'darkgreen', 'crimson'])
+    ax.pcolor(forest[0,:,:], cmap=forest_cmap, vmin=1, vmax=3)
+    ax.set_title(f'Forest Status (i-step = {0:03d})')
+    ax.set_xlabel('X km')
+    ax.set_ylabel('Y km')
+    fig.savefig(f'fig{0:04d}.png')
+    plt.show()
 
     # Store the number of burning cells at each iteration
     burning_cells = [(forest[0, :, :] == 3).sum()]
@@ -94,14 +100,14 @@ def full_fire_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_spr
         
         # Visualize the current state
 
-        # fig,ax = plt.subplots(1,1)
-        # forest_cmap = ListedColormap(['tan', 'darkgreen', 'crimson'])
-        # ax.pcolor(forest[k+1,:,:], cmap=forest_cmap, vmin=1, vmax=3)
-        # ax.set_title(f'Forest Status (i-step = {k+1:03d})')
-        # ax.set_xlabel('X km')
-        # ax.set_ylabel('Y km')
-        # fig.savefig(f'fig{k+1:04d}.png')
-        #plt.show()
+        fig,ax = plt.subplots(1,1)
+        forest_cmap = ListedColormap(['tan', 'darkgreen', 'crimson'])
+        ax.pcolor(forest[k+1,:,:], cmap=forest_cmap, vmin=1, vmax=3)
+        ax.set_title(f'Forest Status (i-step = {k+1:03d})')
+        ax.set_xlabel('X km')
+        ax.set_ylabel('Y km')
+        fig.savefig(f'fig{k+1:04d}.png')
+        plt.show()
 
         # Quit if all fires are out
         nBurn = (forest[k+1,:,:] == 3).sum()
@@ -112,7 +118,7 @@ def full_fire_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_spr
     
     # ****_COMMENT THIS LINE WHEN RUNNING scatter_initial_density_sim() SIMULATION_*****
     # ****_UNCOMMENT WHEN RUNNING line_graph_fire_spread_sim() SIMULATION_*****
-    #return burning_cells
+    return burning_cells
     
     # Calculate total area burned (cells changed to state 1 from state 3)
 
@@ -154,14 +160,14 @@ def full_disease_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_
 
     # Visualize the initial state
 
-    # fig,ax = plt.subplots(1,1)
-    # forest_cmap = ListedColormap(['black','lightgreen', 'darkgreen', 'crimson'])
-    # ax.pcolor(disease[0,:,:], cmap=forest_cmap, vmin=0, vmax=3)
-    # ax.set_title(f'Disease Status (i-step = {0:03d})')
-    # ax.set_xlabel('X km')
-    # ax.set_ylabel('Y km')
-    # fig.savefig(f'fig{0:04d}.png')
-    # plt.show()
+    fig,ax = plt.subplots(1,1)
+    forest_cmap = ListedColormap(['black','lightgreen', 'darkgreen', 'crimson'])
+    ax.pcolor(disease[0,:,:], cmap=forest_cmap, vmin=0, vmax=3)
+    ax.set_title(f'Disease Status (i-step = {0:03d})')
+    ax.set_xlabel('X km')
+    ax.set_ylabel('Y km')
+    fig.savefig(f'fig{0:04d}.png')
+    plt.show()
 
     for k in range(maxiter-1) :
         ignite = np.random.rand(nNorth, nEast) # Random spread probability
@@ -206,14 +212,14 @@ def full_disease_spread(nNorth = nNorth, nEast = nEast, maxiter = maxiter, prob_
         
         # Visualize the current state
 
-        # fig,ax = plt.subplots(1,1)
-        # ax.set_title(f'Disease Status (i-step = {k+1:03d})')
-        # ax.set_xlabel('X units')
-        # ax.set_ylabel('Y units')
-        # forest_cmap = ListedColormap(['black','lightgreen', 'darkgreen', 'crimson'])
-        # ax.pcolor(disease[k+1,:,:], cmap=forest_cmap, vmin=0, vmax=3)
-        # fig.savefig(f'fig{k+1:04d}.png')
-        # plt.show()
+        fig,ax = plt.subplots(1,1)
+        ax.set_title(f'Disease Status (i-step = {k+1:03d})')
+        ax.set_xlabel('X units')
+        ax.set_ylabel('Y units')
+        forest_cmap = ListedColormap(['black','lightgreen', 'darkgreen', 'crimson'])
+        ax.pcolor(disease[k+1,:,:], cmap=forest_cmap, vmin=0, vmax=3)
+        fig.savefig(f'fig{k+1:04d}.png')
+        plt.show()
 
         # Count the number of susceptible, infected, immune, and deceased cells
         infected_count = np.sum(disease[k + 1, :, :] == 3)
@@ -336,8 +342,8 @@ def bar_graph_initial_vaccination_sim():
     for prob_bare in prob_bare_list:
         # Run the disease spread simulation
         infected_counts, _, _ = full_disease_spread(
-            nNorth=8, 
-            nEast=10, 
+            nNorth=20, 
+            nEast=20, 
             maxiter=20, 
             prob_spread=1.0, 
             prob_bare=prob_bare,
@@ -356,6 +362,8 @@ def bar_graph_initial_vaccination_sim():
     plt.title('Effect of Early Vaccination on Peak Infection Count')
     plt.show()  # Display the plot
 
+
+
 # UNCOMMENT THIS LINE TO CREATE A 3x3 grid, 100% CHANCE OF
 # SPREAD, ZERO BARE INITIAL SPOTS, AND ONLY THE CENTER CELL ON FIRE
 #full_fire_spread()
@@ -367,12 +375,12 @@ def bar_graph_initial_vaccination_sim():
 #----------------
 
 # UNCOMMENT THIS LINE TO CREATE A 4x6 grid, 100% CHANCE OF
-# SPREAD, ZERO IMMUNE INITIAL SPOTS, AND ONLY THE CENTER CELL INFECTED
+# SPREAD, ZERO IMMUNE INITIAL SPOTS, FATAL PROBABILITY AT 50% ,AND ONLY THE CENTER CELL INFECTED
 #full_disease_spread(4,6,10)
 #------------------
 
 # UNCOMMENT THIS LINE TO CREATE A 4x6 grid, 100% CHANCE OF
-# SPREAD, 50% PROB OF IMMUNE INITIAL SPOTS, AND ONLY THE CENTER CELL INFECTED
+# SPREAD, 50% PROB OF IMMUNE INITIAL SPOTS, 50% FATAL PROBABILITY AND ONLY THE CENTER CELL INFECTED
 #full_disease_spread(4,6,10,1.0,0.5,1.0)
 #--------------------
     
@@ -386,12 +394,13 @@ def bar_graph_initial_vaccination_sim():
 
 # UNCOMMENT THIS LINE TO CREATE A SCATTER PLOT TO ANALYZE THE FIRE SPREAD OVER TIME WITH 
 # VARIATION IN THE INITIAL FOREST DENSITY (INITIAL BARE SPOTS):
+# GO TO FULL FIRE SPREAD FUNCTION TO COMMENT CODE WHERE ASKED
 #scatter_initial_density_sim()
 #----------------------
 
 # UNCOMMENT THIS LINE TO CREATE A LINE GRAPH TO ANALYZE THE DISEASE SPREAD OVER TIME WITH 
 # VARIATION IN THE MORTALITY RATE (PROB OF FATALITY):
-line_graph_mortality_rate_sim()
+#line_graph_mortality_rate_sim()
 #----------------------
 
 # UNCOMMENT THIS LINE TO CREATE A BAR GRAPH TO ANALYZE THE DISEASE SPREAD OVER TIME WITH 
