@@ -74,3 +74,76 @@ plt.legend()
 
 plt.tight_layout()
 plt.show()
+
+# Function to compare the Euler method with different time steps
+def compare_euler_rk8_comp(func = dNdt_comp, N1_init=0.3, N2_init=0.6, t_final=100, a=1, b=2, c=1, d=3):
+    time_steps = [1.0, 0.5, 0.1]  # Different Euler time steps to try
+    plt.figure(figsize=(12, 8))
+
+    # Loop over each time step
+    for dT in time_steps:
+        time, N1, N2 = euler_solve(func, N1_init, N2_init, dT=dT, t_final=t_final, a=a, b=b, c=c, d=d)
+        plt.plot(time, N1, label=f"Species 1 (Euler dT={dT})")
+        plt.plot(time, N2, label=f"Species 2 (Euler dT={dT})")
+
+    # RK8 Method (DOP853)
+    time_rk8, N1_rk8, N2_rk8 = solve_rk8(func, N1_init, N2_init, t_final=t_final, a=a, b=b, c=c, d=d)
+    plt.plot(time_rk8, N1_rk8, linestyle='--', label="Species 1 (RK8)", color='black')
+    plt.plot(time_rk8, N2_rk8, linestyle='--', label="Species 2 (RK8)", color='gray')
+
+    plt.xlabel('Time (years)')
+    plt.ylabel('Normalized Population')
+    plt.title("Comparison of Euler and RK8 Methods for Lotka-Volterra Model")
+    plt.legend()
+    plt.show()
+
+# Function to compare the Euler method with different time steps
+def compare_euler_rk8_preprey(func = dNdt_predator_prey, N1_init=0.3, N2_init=0.6, t_final=100, a=1, b=2, c=1, d=3):
+    time_steps = [0.065, 0.05, 0.01]  # Different Euler time steps to try
+    plt.figure(figsize=(12, 8))
+
+    # Loop over each time step
+    for dT in time_steps:
+        time, N1, N2 = euler_solve(func, N1_init, N2_init, dT=dT, t_final=t_final, a=a, b=b, c=c, d=d)
+        plt.plot(time, N1, label=f"Species 1 (Euler dT={dT})")
+        plt.plot(time, N2, label=f"Species 2 (Euler dT={dT})")
+
+        # RK8 Method (DOP853)
+        time_rk8, N1_rk8, N2_rk8 = solve_rk8(func, N1_init, N2_init, t_final=t_final, a=a, b=b, c=c, d=d)
+        plt.plot(time_rk8, N1_rk8, linestyle='--', label="Species 1 (RK8)", color='black')
+        plt.plot(time_rk8, N2_rk8, linestyle='--', label="Species 2 (RK8)", color='gray')
+
+        plt.xlabel('Time (years)')
+        plt.ylabel('Normalized Population')
+        plt.title(f"Comparison of Euler and RK8 Methods for Lotka-Volterra Model (dT = {dT})")
+        plt.legend()
+        plt.show()
+
+# Run comparison for the Competition model
+compare_euler_rk8_comp()
+
+# Run comparison for the Predator-Prey model
+compare_euler_rk8_preprey()
+
+#---------------------------------------------------------
+
+time, N1, N2 = euler_solve(dNdt_comp, N1_init=0.5, N2_init=0.5, dT=0.1, t_final=100, a=1, b=1, c=1, d=1)
+time_rk8, N1_rk8, N2_rk8 = solve_rk8(dNdt_comp, N1_init=0.5, N2_init=0.5, t_final=100, a=1, b=1, c=1, d=1)
+
+# Plot results for competition model
+plt.figure(figsize=(10, 6))
+
+plt.subplot(1, 2, 1)
+plt.plot(time, N1, label="Species 1 (Euler - Competition)")
+plt.plot(time, N2, label="Species 2 (Euler - Competition)")
+plt.plot(time_rk8, N1_rk8, linestyle='--', label="Species 1 (RK8 - Competition)")
+plt.plot(time_rk8, N2_rk8, linestyle='--', label="Species 2 (RK8 - Competition)")
+plt.xlabel('Time (years)')
+plt.ylabel('Population')
+plt.title("Competition Model Equilibrium")
+plt.legend()
+plt.show()
+
+#---------------------------------------------------------
+
+
