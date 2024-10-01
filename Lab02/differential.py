@@ -1,7 +1,20 @@
 #!/usr/bin/env python3
 
 '''
-DO THIS LATER
+This file contains tools and scripts for completing Lab 2 for CLaSP 410. 
+We explore the questions found below:
+
+-How does the performance of the Euler method solver compare to the 8th-order DOP853 method for both sets of equations? 
+-How do the initial conditions and coefficient values affect the final result and general behavior of the two species? 
+-How do the initial conditions and coefficient values affect the final result and general behavior
+of the two species?
+
+In this lab, I will create two ODE solvers. One will use the first-order-accurate
+Euler method with a constant forward time step. The second will use the Scipy implementation
+of the Dormand-Prince embedded 8th-order Runge-Kutta method with adaptive stepsize, called
+DOP853. This method is an ”industry standard” ODE solver that is efficient, high-order, and
+accurate. These solvers will be used to solve the Lotka-Volterra competition and predator-prey models
+and analyze the growth/decline of the species (in broad terms).
 
 To reproduce the plots shown in the lab report, do this...
 '''
@@ -181,7 +194,7 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 
-# Function to compare the Euler method with different time steps
+# Function to compare the Euler method with different time steps for competition model
 def compare_euler_rk8_comp(func=dNdt_comp, N1_init=0.3, N2_init=0.6, t_final=100, a=1, b=2, c=1, d=3):
     '''
     Compares the Euler method with various time steps against the RK8 (DOP853) method 
@@ -213,11 +226,11 @@ def compare_euler_rk8_comp(func=dNdt_comp, N1_init=0.3, N2_init=0.6, t_final=100
 
     plt.xlabel('Time (years)')
     plt.ylabel('Normalized Population')
-    plt.title("Comparison of Euler and RK8 Methods for Lotka-Volterra Model")
+    plt.title("Comparison of Euler and RK8 Methods for Competition Model")
     plt.legend()
     plt.show()
 
-# Function to compare the Euler method with different time steps
+# Function to compare the Euler method with different time steps for predator-prey model
 def compare_euler_rk8_preprey(func = dNdt_predator_prey, N1_init=0.3, N2_init=0.6, t_final=100, a=1, b=2, c=1, d=3):
     '''
     Compares the Euler method with various time steps against the RK8 (DOP853) method 
@@ -249,7 +262,7 @@ def compare_euler_rk8_preprey(func = dNdt_predator_prey, N1_init=0.3, N2_init=0.
 
         plt.xlabel('Time (years)')
         plt.ylabel('Normalized Population')
-        plt.title(f"Comparison of Euler and RK8 Methods for Lotka-Volterra Model (dT = {dT})")
+        plt.title(f"Comparison of Euler and RK8 Methods for Predator-Prey Model (dT = {dT})")
         plt.legend()
         plt.show()
 
