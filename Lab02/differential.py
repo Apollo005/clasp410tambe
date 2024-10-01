@@ -14,7 +14,7 @@ Euler method with a constant forward time step. The second will use the Scipy im
 of the Dormand-Prince embedded 8th-order Runge-Kutta method with adaptive stepsize, called
 DOP853. This method is an ”industry standard” ODE solver that is efficient, high-order, and
 accurate. These solvers will be used to solve the Lotka-Volterra competition and predator-prey models
-and analyze the growth/decline of the species (in broad terms).
+and analyze the growth/decline of the species (in broad terms)
 
 To reproduce the plots shown in the lab report, do this...
 '''
@@ -274,8 +274,8 @@ compare_euler_rk8_preprey()
 
 #---------------------------------------------------------
 
-time, N1, N2 = euler_solve(dNdt_comp, N1_init=0.5, N2_init=0.5, dT=0.1, t_final=100, a=1, b=1, c=1, d=1)
-time_rk8, N1_rk8, N2_rk8 = solve_rk8(dNdt_comp, N1_init=0.5, N2_init=0.5, t_final=100, a=1, b=1, c=1, d=1)
+time, N1, N2 = euler_solve(dNdt_comp, N1_init=0.4, N2_init=0.4, dT=0.1, t_final=100, a=4, b=3, c=2, d=1)
+time_rk8, N1_rk8, N2_rk8 = solve_rk8(dNdt_comp, N1_init=0.4, N2_init=0.4, t_final=100, a=4, b=3, c=2, d=1)
 
 # Plot results for competition model
 plt.figure(figsize=(10, 6))
