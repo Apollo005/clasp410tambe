@@ -16,7 +16,11 @@ DOP853. This method is an ”industry standard” ODE solver that is efficient, 
 accurate. These solvers will be used to solve the Lotka-Volterra competition and predator-prey models
 and analyze the growth/decline of the species (in broad terms)
 
-To reproduce the plots shown in the lab report, do this...
+To reproduce the plots shown in the lab report, simply run the code and you will get the same figures displayed
+in the report...
+
+Note for the phase diagrams and population vs time plots for the predator-prey equation modeling, I produce more
+output than in the report so you can "x" out of them or look at them if preferred!
 '''
 
 import numpy as np
