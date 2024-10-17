@@ -83,7 +83,7 @@ print(n_layer_atmos(3, 0.5))
 
 #####################################
 
-# First experiment: Vary emissivity and measure surface temperature with 1 atmospheric layer
+# Second experiment: Vary emissivity and measure surface temperature with 1 atmospheric layer
 N = 1  # Single-layer atmosphere for this experiment
 epsilon_values = np.linspace(0.1, 1.0, 50)  # Vary emissivity from 0.1 to 1.0 in 50 steps
 # For each emissivity, calculate the surface temperature and store the result
@@ -102,7 +102,7 @@ epsilon_earth_guess = epsilon_values[np.argmin(np.abs(np.array(surface_temps_1_l
 # Print the estimated emissivity where the surface temperature is closest to 288K (Earth-like conditions)
 print(f"Estimated Earth emissivity for 288K: {epsilon_earth_guess}")
 
-# Second experiment: Vary number of layers with emissivity fixed at 0.255
+# Third experiment: Vary number of layers with emissivity fixed at 0.255
 epsilon = 0.255  # Effective emissivity of Earth's atmosphere
 layer_counts = np.arange(1, 10)  # Vary number of layers from 1 to 10
 # For each number of layers, calculate the surface temperature
@@ -159,7 +159,7 @@ plt.show()
 
 #################################
 
-# Define the nuclear_winter_atmos function
+# Fourth experiment: Define the nuclear_winter_atmos function
 def nuclear_winter_atmos(N, epsilon, S0=1350, albedo=0.33, debug=False):
     '''
     Solve the n-layer atmosphere problem for a nuclear winter scenario.
