@@ -127,10 +127,10 @@ print(f"Number of layers needed for 288K surface temperature: {layers_needed}")
 T_venus = 700  # K (Venus surface temperature)
 S0_venus = 2600  # W/m² (Solar constant for Venus)
 epsilon_venus = 1.0  # Perfect emissivity (Venus's thick atmosphere absorbs all radiation)
-albedo_venus = 0.33  # Venus's albedo (reflectivity), due to its thick cloud cover
+albedo_venus = 0.70  # Venus's albedo (reflectivity), due to its thick cloud cover
 
 # Try various numbers of layers (up to 50) to estimate Venus's atmosphere properties
-N_vals = range(1, 50)  # Number of atmospheric layers from 1 to 50
+N_vals = range(1, 80)  # Number of atmospheric layers from 1 to 50
 temps_surface = []  # List to store the surface temperatures
 
 # Compute surface temperature for each N value
