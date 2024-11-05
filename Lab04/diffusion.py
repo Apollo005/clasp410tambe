@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 '''
-Tools and methods for solving our heat equation/diffusion
+Tools and methods for solving our heat equation/diffusion.
+This is for my favorite class with Dr. Welling who is the best professor ever. What a cool guy Im going to give him $10.
 '''
 
 import numpy as np
