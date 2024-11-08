@@ -1,225 +1,208 @@
+#!/usr/bin/env python3
+"""
+This lab investigates heat diffusion within Arctic permafrost layers using forward-difference numerical methods 
+for solving one-dimensional diffusion equations. Through this study, we aim to model and understand the thermal 
+profiles of permafrost in response to seasonal temperature fluctuations and evaluate how global warming impacts 
+these profiles.
+
+We start by implementing a forward-difference solver for the heat equation, assessing solver stability with respect 
+to time step, spatial resolution, and diffusion rate. The model is then applied to simulate the permafrost depth 
+and active layer characteristics in Kangerlussuaq, Greenland, a region experiencing pronounced seasonal temperature 
+variations.
+
+Using historical data and simulated warming scenarios, we examine changes in permafrost stability and the depth 
+of the active layer, projecting long-term changes due to rising atmospheric temperatures. This lab illustrates the 
+impact of climate change on Arctic biomes, focusing on the thermal evolution of permafrost and its implications 
+for carbon release and biome stability.
+
+To run this code simply run the file and check the output figures and their usage/implications within the lab document
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-def heatdiff(xmax=1, tmax=.2, dx=.2, dt=.02, c2=1, neumann=False, debug=False):
-    '''
+# Average monthly temperatures in Kangerlussuaq, Greenland (°C)
+T_KANGER = np.array([-19.7, -21.0, -17.0, -8.4, 2.3, 8.4, 10.7, 8.5, 3.1, -6.0, -12.0, -16.9])
+
+def temp_kanger(t, shift=0):
+    """
+    Calculates an annual sinusoidal approximation of temperature at Kangerlussuaq over time with an optional temperature shift.
+    
     Parameters:
-    -----------
-    xmax : float, defaults to 1
-        Set the domain upper boundary location. In meters.
-    tmax : float, defaults to .2s
-        Set the domain time limit in seconds.
-    neumann : bool, defaults to False
-        Switch to Neumann boundary conditions if true where dU/dx = 0
-        Default behavior is Dirichlet where U=0 at boundaries.
+    - t: array-like, time in days (can be an array representing multiple time points).
+    - shift: float, a temperature shift to simulate warming effects.
+    
+    Returns:
+    - Temperature values (°C) at each time point in t with the given temperature shift.
+    """
+    amplitude = (T_KANGER - T_KANGER.mean()).max()  # Maximum deviation from the mean temperature
+    return amplitude * np.sin(np.radians(t) - np.pi/2) + T_KANGER.mean() + shift
+
+def heatdiff(xmax, tmax, dx, dt, shift, c2=0.0216, validate=False, visual=False):
+    """
+    Simulates heat diffusion through soil for permafrost analysis in response to warming.
+    
+    Parameters:
+    - xmax: float, maximum depth (m).
+    - tmax: float, maximum time duration (days).
+    - dx: float, spatial step size (m).
+    - dt: float, time step size (days).
+    - shift: float, temperature shift for simulating warming.
+    - c2: float, thermal diffusivity of the ground (default: 0.0216).
+    - validate: bool, if True, print U array for debugging.
+    - visual: bool, if True, generate visual output of temperature profile.
 
     Returns:
-    --------
+    - xgrid: array, spatial grid.
+    - tgrid: array, time grid.
+    - U: 2D array, temperature distribution over depth and time.
+    - active_layer_depth: float, depth of active layer where seasonal temperature changes.
+    - permafrost_depth: float, depth where permafrost starts.
+    """
+    if dt >= (dx ** 2) / (2 * c2):
+        raise ValueError(f"Unstable configuration: Reduce dt to less than {(dx ** 2) / (2 * c2)}")
 
-    '''
+    # Create spatial (depth) and temporal grids
+    M = int(xmax / dx) + 1  # Number of spatial points
+    N = int(tmax / dt) + 1  # Number of time points
+    xgrid = np.linspace(0, xmax, M)  # Spatial grid from 0 to xmax
+    tgrid = np.linspace(0, tmax, N)  # Time grid from 0 to tmax
 
-    # Start by calculating size of array: MxN
-    M = int(np.round(xmax / dx + 1))
-    N = int(np.round(tmax / dt + 1))
+    # Initialize temperature distribution matrix
+    U = np.zeros((M, N))
 
-    xgrid, tgrid = np.arange(0, xmax+dx, dx), np.arange(0, tmax+dt, dt)
+    # Initial and boundary conditions
+    if validate:
+        # Validation condition: set initial profile to a specific function for testing
+        U[:, 0] = 4 * xgrid - 4 * xgrid**2
+        U[0, :], U[-1, :] = 0, 0  # Boundary conditions at surface and bottom depth
+    else:
+        # Actual scenario: apply temperature model at the surface with specified shift
+        U[0, :] = temp_kanger(tgrid, shift)
+        U[-1, :] = 5  # Constant temperature at the bottom boundary
 
-    if debug:
-        print(f'Our grid goes from 0 to {xmax}m and 0 to {tmax}s')
-        print(f'Our spatial step is {dx} and time step is {dt}')
-        print(f'There are {M} points in space and {N} points in time.')
-        print('Here is our spatial grid:')
-        print(xgrid)
-        print('Here is our time grid:')
-        print(tgrid)
-
-    # Initialize our data array:
-    U = np.zeros([M, N])
-
-    # Set initial conditions:
-    U[:, 0] = 4*xgrid - 4*xgrid**2
-
-    # Set boundary conditions:
-    U[0, :] = 0
-    U[-1, :] = 0
-
-    # Set our "r" constant.
+    # Stability factor for the diffusion process
     r = c2 * dt / dx**2
 
-    # Solve! Forward differnce ahoy.
-    for j in range(N-1):
-        U[1:-1, j+1] = (1-2*r) * U[1:-1, j] + \
-            r*(U[2:, j] + U[:-2, j])
-        # Set Neumann-type boundary conditions:
-        if neumann:
-            U[0, j+1] = U[1, j+1]
-            U[-1, j+1] = U[-2, j+1]
+    # Heat diffusion loop over time
+    for j in range(N - 1):
+        # Update temperature at each depth except boundaries using finite difference
+        U[1:-1, j+1] = U[1:-1, j] * (1 - 2 * r) + r * (U[2:, j] + U[:-2, j])
 
-    # Return grid and result:
-    return xgrid, tgrid, U
+    if validate:
+        print(np.array2string(U))
+        return xgrid, tgrid, U
 
-x, t, heat = heatdiff()
+    if not validate:
+        if visual:
+            # Display temperature distribution over time and depth
+            fig, ax1 = plt.subplots()
+            temp_map = ax1.pcolor(tgrid / 365, xgrid, U, cmap='seismic', vmin=-25, vmax=25)
+            ax1.set(title='Ground Temperature: Kangerlussuaq, Greenland', xlabel='Time (Years)', ylabel='Depth (m)')
+            ax1.invert_yaxis()
+            plt.colorbar(temp_map, ax=ax1, label='Temperature (°C)')
+            plt.figtext(0.5, -0.04, f"Temperature Offset: {shift}°C", ha="center", fontsize=12)
+            plt.show()
 
-# Validation Bounds
-fig, ax = plt.subplots(figsize=(8, 6))
-c = ax.pcolor(t, x, heat, cmap='plasma', vmin=0, vmax=1)
-plt.colorbar(c, ax=ax, label='Temperature (°C)')
-plt.xlabel('Time (s)')
-plt.ylabel('Position (m)')
-plt.title('Heat Diffusion Solution')
+        # Identify active layer depth and permafrost depth using summer and winter temperature profiles
+        steps_per_year = int(-365 / dt)
+        summer_temps = U[:, steps_per_year:].max(axis=1)  # Max temperature at each depth over summer
+        winter_temps = U[:, steps_per_year:].min(axis=1)  # Min temperature at each depth over winter
+
+        # Determine active layer depth (first depth where summer temperature crosses from positive to negative)
+        active_layer_depth = None
+        for i in range(1, len(summer_temps)):
+            if summer_temps[i] < 0 and summer_temps[i-1] > 0:
+                depth1, depth2 = xgrid[i-1], xgrid[i]
+                temp1, temp2 = summer_temps[i-1], summer_temps[i]
+                active_layer_depth = depth1 + (0 - temp1) * (depth2 - depth1) / (temp2 - temp1)
+                break
+
+        # Determine permafrost depth (first depth from bottom where summer temperature reaches 0°C)
+        permafrost_depth = None
+        for i in range(len(summer_temps) - 1, -1, -1):
+            if abs(summer_temps[i]) < 1e-2:
+                permafrost_depth = xgrid[i]
+                break
+
+        # Visualize seasonal temperature profiles with marked active layer and permafrost depths
+        if visual:
+            fig, ax2 = plt.subplots(figsize=(10, 8))
+            ax2.plot(winter_temps, xgrid, label='Winter', color='blue')
+            ax2.plot(summer_temps, xgrid, label='Summer', linestyle='--', color='red')
+            ax2.invert_yaxis()
+            ax2.set(xlabel='Temperature (°C)', ylabel='Depth (m)', title=f"Seasonal Profiles with Temperature Offset: {shift}°C")
+            if active_layer_depth is not None:
+                ax2.axhline(y=active_layer_depth, color='green', linestyle=':', label=f'Active Layer Depth ({active_layer_depth:.2f} m)')
+            if permafrost_depth is not None:
+                ax2.axhline(y=permafrost_depth, color='purple', linestyle='--', label=f'Permafrost Depth ({permafrost_depth:.2f} m)')
+            ax2.legend()
+            ax2.grid(True)
+            plt.figtext(0.5, 0.01, f"Time Elapsed: {tmax/365:.2f} Years", ha="center", fontsize=12)
+            plt.show()
+
+        return xgrid, tgrid, U, active_layer_depth, permafrost_depth
+
+
+# Validation run with heat diffusion
+heatdiff(1, .2, .2, .02, 0, c2=1, validate=True)
+
+# Arrays for time points in years (converted to days) for different visualizations
+yr_arr1 = [3650, 7300, 10950, 21900, 36500]
+
+# Simulations for different time points without temperature shifts
+for tmax in yr_arr1:
+    heatdiff(100, tmax, 0.5, 0.2, 0, visual=True)
+
+# Simulations for different time points with temperature shifts of 0.5°C, 1°C, and 3°C
+for tmax in yr_arr1:
+    heatdiff(100, tmax, 0.5, 0.2, 0.5, visual=True)
+
+for tmax in yr_arr1:
+    heatdiff(100, tmax, 0.5, 0.2, 1, visual=True)
+
+for tmax in yr_arr1:
+    heatdiff(100, tmax, 0.5, 0.2, 3, visual=True)
+
+# Arrays for temperature shifts and time points
+temp_shifts = [0.5, 1, 3]
+yr_arr = [3650, 7300, 10950]
+
+# Store results
+active_layer_depths = {shift: [] for shift in temp_shifts}
+permafrost_depths = {shift: [] for shift in temp_shifts}
+
+# Run simulations for each temperature shift and each time period
+for shift in temp_shifts:
+    for tmax in yr_arr:
+        _, _, _, active_layer_depth, permafrost_depth = heatdiff(100, tmax, 0.5, 0.2, shift, visual=False)
+        active_layer_depths[shift].append(active_layer_depth)
+        permafrost_depths[shift].append(permafrost_depth)
+
+# Plot the results of active layer depth and permafrost depth over time under temperature shifts
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 8))
+
+# Plot active layer depth over time for different temperature shifts
+for shift in temp_shifts:
+    ax1.plot([t / 365 for t in yr_arr], active_layer_depths[shift], marker='o', label=f'Temp Shift: {shift}°C')
+ax1.set_title('Active Layer Depth over Time under Temperature Shifts')
+ax1.set_xlabel('Time (Years)')
+ax1.set_ylabel('Active Layer Depth (m)')
+ax1.invert_yaxis()
+ax1.legend()
+ax1.grid(True)
+
+# Plot permafrost depth over time for different temperature shifts
+for shift in temp_shifts:
+    ax2.plot([t / 365 for t in yr_arr], permafrost_depths[shift], marker='o', label=f'Temp Shift: {shift}°C')
+ax2.set_title('Permafrost Depth over Time under Temperature Shifts')
+ax2.set_xlabel('Time (Years)')
+ax2.set_ylabel('Permafrost Depth (m)')
+ax2.set_ylim(-5, 100)  # Adjusted y-axis range for better visibility
+ax2.invert_yaxis()
+ax2.legend()
+ax2.grid(True)
+
+plt.suptitle('Impact of Global Warming on Active Layer and Permafrost Depths in Kangerlussuaq')
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.show()
-
-# Validation of the solver with specific conditions
-def heatdiff_validate(xmax=1, tmax=0.2, dx=0.2, dt=0.02, c2=1):
-    M = int(np.round(xmax / dx + 1))
-    N = int(np.round(tmax / dt + 1))
-    xgrid, tgrid = np.linspace(0, xmax, M), np.linspace(0, tmax, N)
-
-    # Initialize U and set initial and boundary conditions
-    U = np.zeros([M, N])
-    U[:, 0] = 4 * xgrid - 4 * xgrid**2  # U(x, 0) = 4x - 4x^2
-    U[0, :] = U[-1, :] = 0  # U(0, t) = U(1, t) = 0
-
-    r = c2 * dt / dx**2  # Compute r for stability
-    if r > 0.5:  # Stability condition
-        raise ValueError("The configuration is not numerically stable.")
-
-    for j in range(N-1):
-        U[1:-1, j+1] = (1 - 2 * r) * U[1:-1, j] + r * (U[2:, j] + U[:-2, j])
-
-    return xgrid, tgrid, U
-
-# Run validation
-x, t, U = heatdiff_validate()
-
-# Plot the result for validation
-plt.figure()
-for i in range(0, len(t), 5):  # Plot at intervals of 5 time steps
-    plt.plot(x, U[:, i], label=f't={t[i]:.2f}s')
-plt.xlabel('Distance (m)')
-plt.ylabel('Temperature (°C)')
-plt.title('Heat Diffusion: Validation Case')
-plt.legend()
-plt.show()
-
-heatdiff_validate()
-
-def temp_kanger(t, temp_shift=0):
-    '''
-    For an array of times in days, return timeseries of temperature for
-    Kangerlussuaq, Greenland with optional temperature shift for climate change scenarios.
-    '''
-    t_kanger = np.array([-19.7, -21.0, -17.0, -8.4, 2.3, 8.4,
-                         10.7, 8.5, 3.1, -6.0, -12.0, -16.9]) + temp_shift
-    t_amp = (t_kanger - t_kanger.mean()).max()
-    return t_amp * np.sin(np.pi / 180 * t - np.pi / 2) + t_kanger.mean()
-
-def permafrost_model(depth_max=100, time_max=365*10, dx=1, dt=1, 
-                    c2=0.25e-6, temp_shift=0):
-    '''
-    Solve heat equation for permafrost with Kangerlussuaq surface temperatures.
-    '''
-    
-    # Convert c2 from m²/s to m²/day for daily timesteps
-    c2 = c2 * 86400  # seconds per day
-    
-    # Calculate grid dimensions
-    M = int(np.round(depth_max / dx + 1))
-    N = int(np.round(time_max / dt + 1))
-    
-    # Create spatial and temporal grids
-    depth = np.linspace(0, depth_max, M)
-    time = np.linspace(0, time_max, N)
-    
-    # Check stability
-    r = c2 * dt / (dx**2)
-    if r > 0.5:
-        raise ValueError(f"Solution unstable! r = {r:.3f} > 0.5")
-    
-    # Initialize temperature array with a slight gradient
-    T = np.zeros((M, N))
-    surface_temp = -5     # surface starts cooler
-    geothermal_gradient = 0.1  # degrees Celsius per meter
-    T[:, 0] = surface_temp + geothermal_gradient * depth  # Set initial gradient
-    
-    # Set boundary conditions
-    T[0, :] = temp_kanger(time, temp_shift)             # Upper boundary: surface temperature
-    T[-1, :] = T[-2, :] + geothermal_gradient * dx      # Lower boundary: geothermal warming
-    
-    # Solve using forward difference
-    for j in range(N-1):
-        T[1:-1, j+1] = (1-2*r)*T[1:-1, j] + r*(T[2:, j] + T[:-2, j])
-        # Update lower boundary dynamically to simulate geothermal heat influx
-        T[-1, j+1] = T[-2, j+1] + geothermal_gradient * dx
-
-    return depth, time, T, dt
-
-def plot_results(depth, time, T, dt, temp_shift=0):
-    '''
-    Create visualization of results.
-    '''
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 8))
-    
-    # Plot 1: Heat map of temperature over time and depth
-    pcm = ax1.pcolormesh(time / 365, depth, T, cmap='seismic', vmin=-25, vmax=25)
-    ax1.invert_yaxis()
-    ax1.set_xlabel('Time (years)')
-    ax1.set_ylabel('Depth (m)')
-    ax1.set_title(f'Ground Temperature Evolution (+{temp_shift}°C scenario)')
-    plt.colorbar(pcm, ax=ax1, label='Temperature (°C)')
-    
-    # Plot 2: Temperature profiles for summer and winter
-    year_steps = int(365 / dt)
-    last_year = T[:, -year_steps:]
-    winter = last_year.min(axis=1)
-    summer = last_year.max(axis=1)
-    
-    ax2.plot(winter, depth, 'b-', label='Winter')
-    ax2.plot(summer, depth, 'r-', label='Summer')
-    ax2.axvline(0, color='k', linestyle='--', alpha=0.5)
-    ax2.invert_yaxis()
-    ax2.set_xlabel('Temperature (°C)')
-    ax2.set_ylabel('Depth (m)')
-    ax2.set_title(f'Seasonal Temperature Profiles (+{temp_shift}°C scenario)')
-    ax2.legend()
-    ax2.grid(True)
-    
-    plt.tight_layout()
-    plt.show()
-
-def analyze_layers(depth, T, dt):
-    '''
-    Analyze active and permafrost layer depths.
-    '''
-    year_steps = int(365 / dt)
-    last_year = T[:, -year_steps:]
-    winter = last_year.min(axis=1)
-    summer = last_year.max(axis=1)
-    
-    # Find active layer depth (where summer temp goes above 0°C)
-    active_layer = depth[np.where(summer > 0)[0][-1]] if np.any(summer > 0) else 0
-    
-    # Find permafrost bottom (where winter temp goes above 0°C)
-    permafrost_bottom = depth[np.where(winter < 0)[0][-1]] if np.any(winter < 0) else None
-    
-    return active_layer, permafrost_bottom
-
-# Run baseline scenario
-depth, time, T, dt = permafrost_model(temp_shift=0)
-plot_results(depth, time, T, dt, temp_shift=0)
-
-# Analyze and print results for each scenario
-scenarios = [0, 0.5, 1.0, 3.0]
-for temp_shift in scenarios:
-    depth, time, T, dt = permafrost_model(temp_shift=temp_shift)
-    active_layer, permafrost_bottom = analyze_layers(depth, T, dt)
-    print(f"\nScenario: +{temp_shift}°C")
-    print(f"Active layer depth: {active_layer:.1f}m")
-    if permafrost_bottom is not None:
-        print(f"Permafrost bottom depth: {permafrost_bottom:.1f}m")
-        print(f"Permafrost thickness: {permafrost_bottom - active_layer:.1f}m")
-    else:
-        print("No permafrost layer present")
-    
-    # Display the updated results
-    plot_results(depth, time, T, dt, temp_shift=temp_shift)
