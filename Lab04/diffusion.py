@@ -16,6 +16,7 @@ impact of climate change on Arctic biomes, focusing on the thermal evolution of 
 for carbon release and biome stability.
 
 To run this code simply run the file and check the output figures and their usage/implications within the lab document
+Read the comments to ensure Python does not crash (basically comment and uncomment the loops below line 154 to ensure code runtime efficiency)
 """
 
 import numpy as np
@@ -145,24 +146,28 @@ def heatdiff(xmax, tmax, dx, dt, shift, c2=0.0216, validate=False, visual=False)
 
 
 # Validation run with heat diffusion
-heatdiff(1, .2, .2, .02, 0, c2=1, validate=True)
+# heatdiff(1, .2, .2, .02, 0, c2=1, validate=True)
 
 # Arrays for time points in years (converted to days) for different visualizations
 yr_arr1 = [3650, 7300, 10950, 21900, 36500]
 
+# Uncomment these lines 155-156 and run and then comment when running other simulations below:
 # Simulations for different time points without temperature shifts
-for tmax in yr_arr1:
-    heatdiff(100, tmax, 0.5, 0.2, 0, visual=True)
+# for tmax in yr_arr1:
+#     heatdiff(100, tmax, 0.5, 0.2, 0, visual=True)
 
+# Uncomment these lines 160-161 and run and then comment when running other simulations below:
 # Simulations for different time points with temperature shifts of 0.5°C, 1°C, and 3°C
-for tmax in yr_arr1:
-    heatdiff(100, tmax, 0.5, 0.2, 0.5, visual=True)
+# for tmax in yr_arr1:
+#     heatdiff(100, tmax, 0.5, 0.2, 0.5, visual=True)
 
-for tmax in yr_arr1:
-    heatdiff(100, tmax, 0.5, 0.2, 1, visual=True)
+# Uncomment these lines 164-165 and run and then comment when running other simulations below:
+# for tmax in yr_arr1:
+#     heatdiff(100, tmax, 0.5, 0.2, 1, visual=True)
 
-for tmax in yr_arr1:
-    heatdiff(100, tmax, 0.5, 0.2, 3, visual=True)
+# Uncomment these lines 168-169 and run and then comment when running other simulations below:
+# for tmax in yr_arr1:
+#     heatdiff(100, tmax, 0.5, 0.2, 3, visual=True)
 
 # Arrays for temperature shifts and time points
 temp_shifts = [0.5, 1, 3]
