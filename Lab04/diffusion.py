@@ -146,7 +146,7 @@ def heatdiff(xmax, tmax, dx, dt, shift, c2=0.0216, validate=False, visual=False)
 
 
 # Validation run with heat diffusion
-# heatdiff(1, .2, .2, .02, 0, c2=1, validate=True)
+heatdiff(1, .2, .2, .02, 0, c2=1, validate=True)
 
 # Arrays for time points in years (converted to days) for different visualizations
 yr_arr1 = [3650, 7300, 10950, 21900, 36500]
