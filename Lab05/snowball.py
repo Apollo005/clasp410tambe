@@ -9,6 +9,9 @@ The hypothesis challenges our understanding of planetary climate systems by sugg
 While some scientists support this theory, others argue that achieving and escaping such a global glaciation would be 
 physically extremely challenging. An alternative "slushball Earth" hypothesis suggests that while massive glaciation occurred, 
 a narrow band of open ocean might have remained around the equator.
+
+To reproduce the images in the lab, simply run this file and they will be reproduced in the order they were run, and 
+there are comments for each experiment with breakpoint comments like "Experiment 1 code"
 '''
 
 import numpy as np
