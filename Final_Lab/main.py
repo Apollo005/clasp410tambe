@@ -88,9 +88,7 @@ forcing = radiative_forcing(atmosphere_co2)
 temperature = lambda_sensitivity * forcing
 
 # Plot CO2 dynamics using scatter plots
-plt.figure(figsize=(12, 12))
-
-plt.subplot(3, 1, 1)
+plt.figure(figsize=(8, 6))
 plt.scatter(time, atmosphere_co2, label='Atmosphere (ppm)', color='blue', s=10)
 plt.scatter(time, ocean_co2, label='Oceans (GtC)', color='green', s=10)
 plt.scatter(time, terrestrial_co2, label='Terrestrial (GtC)', color='brown', s=10)
@@ -99,26 +97,26 @@ plt.xlabel('Time (years)')
 plt.ylabel('CO2 Levels')
 plt.legend()
 plt.grid()
+plt.show()
 
 # Phase plane analysis for Atmosphere vs. Ocean
-plt.subplot(3, 1, 2)
+plt.figure(figsize=(8, 6))
 plt.plot(atmosphere_co2, ocean_co2, label='Phase Plane: Atmosphere vs Ocean', color='purple')
 plt.title('Phase Plane Analysis')
 plt.xlabel('Atmosphere CO2 (ppm)')
 plt.ylabel('Ocean CO2 (GtC)')
 plt.legend()
 plt.grid()
+plt.show()
 
 # Plot absorbed heat over time
-plt.subplot(3, 1, 3)
+plt.figure(figsize=(8, 6))
 plt.plot(time[:-1], absorbed_heat, label='Absorbed Heat (W/m^2)', color='orange')
 plt.title('Heat Absorption Over Time')
 plt.xlabel('Time (years)')
 plt.ylabel('Heat Absorbed (W/m^2)')
 plt.legend()
 plt.grid()
-
-plt.tight_layout()
 plt.show()
 
 # Bifurcation analysis with varying emissions rates
