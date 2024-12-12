@@ -16,6 +16,8 @@ Based on the established physical principles underlying the Stefan-Boltzmann law
 this study looks into how the flux of CO2 between the three major reservoirs- atmospheric, oceanic, and terrestrial- 
 affects the path of global temperatures. Differential equations, numerical simulations, and scenario analysis in this 
 report aim to provide quantitative information on transient and long-term global temperature variations due to the dynamics of CO2.
+
+To get the code outputs shown in the lab report, simply run this script!
 '''
 
 
